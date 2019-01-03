@@ -1,5 +1,29 @@
 $color: #f00;
 
+* {
+  box-sizing: border-box;
+}
+
 h1 {
   color: $color;
+  text-align: center;
+}
+
+#gameBoard {
+  width: 40vw;
+  height: 40vw;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+
+  .cell {
+    width: 10%;
+    height: 10%;
+  }
+
+  .ship{
+    background-image: url(../assets/images/player.png);
+    background-position: center;
+    background-size: contain;
+  }
 }

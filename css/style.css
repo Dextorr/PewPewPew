@@ -1,2 +1,2 @@
-h1{color:red}
+*{box-sizing:border-box}h1{color:red;text-align:center}#gameBoard{width:40vw;height:40vw;margin:auto;display:flex;flex-wrap:wrap}#gameBoard .cell{width:10%;height:10%}#gameBoard .ship{background-image:url(../assets/images/player.png);background-position:center;background-size:contain}
 /*# sourceMappingURL=style.css.map */
