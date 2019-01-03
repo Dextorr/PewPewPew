@@ -21,10 +21,20 @@ h1 {
     height: 10%;
   }
 
-  .ship{
-    background-image: url(../assets/images/player.png);
+  .ship,
+  .alien {
     background-position: center;
     background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .ship{
+    background-image: url(../assets/images/player.png);
+  }
+
+  .alien{
+    background-image: url(../assets/images/alien.png);
+    transform: scaleY(-1);
   }
 
   .shot{
@@ -36,6 +46,7 @@ h1 {
       #f00 calc(50% + 1px),
       transparent calc(50% + 1.1px),
       transparent 100%
-    ); 
+    );
   }
+
 }

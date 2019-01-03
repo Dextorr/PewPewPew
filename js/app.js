@@ -20,6 +20,13 @@ $(() => {
     $cells.eq(shipIndex).addClass('ship')
   }
 
+  function spawnAlien(){
+    const alienIndex = Math.floor(Math.random() * 10)
+    if (!$cells.eq(alienIndex).hasClass('alien')){
+      $cells.eq(alienIndex).addClass('alien')
+    }
+  }
+
   function fireShot(){
     let shotIndex = shipIndex
     const shotTimer = setInterval(() => {
@@ -31,7 +38,7 @@ $(() => {
         $cells.eq(shotIndex).removeClass('shot')
       }
       console.log('shot', shotIndex)
-    }, 200)
+    }, 100)
     console.log('Shots fired!')
   }
 
@@ -43,10 +50,12 @@ $(() => {
         break
       case 39: if (shipIndex%10 !== 9) shipIndex++
         break
-      case 32: fireShot()
-        break
     }
     moveShip()
     console.log(shipIndex)
+  })
+
+  $(document).on('keyup', e => {
+    if(e.keyCode === 32) fireShot()
   })
 })
