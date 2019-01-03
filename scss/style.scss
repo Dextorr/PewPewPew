@@ -26,4 +26,16 @@ h1 {
     background-position: center;
     background-size: contain;
   }
+
+  .shot{
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      transparent calc(50% - 1.1px),
+      #f00 calc(50% - 1px),
+      #f00 calc(50% + 1px),
+      transparent calc(50% + 1.1px),
+      transparent 100%
+    ); 
+  }
 }
