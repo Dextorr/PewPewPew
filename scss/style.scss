@@ -4,14 +4,18 @@ $color: #f00;
   box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+}
+
 h1 {
   color: $color;
   text-align: center;
 }
 
 #gameBoard {
-  width: 40vw;
-  height: 40vw;
+  width: 60vw;
+  height: 80vh;
   margin: auto;
   display: flex;
   flex-wrap: wrap;
