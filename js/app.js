@@ -1,7 +1,8 @@
 $(() => {
 
   const $gameBoard = $('#gameBoard')
-  let shipIndex = 94
+  let shipIndex = 94,
+    alienMoveTimer
 
   // TEMP just to see gameboard clearly for now
   $gameBoard.css({border: '5px solid #000'})
@@ -46,8 +47,7 @@ $(() => {
     // Initial direction is right
     let dir = 'right'
     // Alien ship moves every half second
-    const alienMoveTimer = setInterval(() => {
-      console.log(alienIndex)
+    alienMoveTimer = setInterval(() => {
       // When the alien reaches the right edge...
       if (alienIndex%10 === 9 && Math.ceil((alienIndex/10)%2) === 1){
         // ...it moves down a row...
@@ -88,6 +88,14 @@ $(() => {
       $cells.eq(shotIndex).removeClass('shot')
       // ...and current position is reassigned to new position
       shotIndex += dir
+      // Collision detection
+      if($cells.eq(shotIndex).hasClass('alien')){
+        console.log('HIT')
+        $cells.eq(shotIndex).removeClass('alien')
+        $cells.eq(shotIndex).removeClass('shot')
+        clearInterval(alienMoveTimer)
+        clearInterval(shotTimer)
+      }
       // When the shot has reached the top of the screen...
       if (shotIndex<0 || shotIndex>100){
         // ...the movement timer stops...
@@ -96,9 +104,6 @@ $(() => {
         $cells.eq(shotIndex).removeClass('shot')
       }
     }, 100)
-
-    // TEMP spawn an alien when a shot is fired
-    spawnAlien()
 
     console.log('Shots fired!')
   }
@@ -113,6 +118,8 @@ $(() => {
         break
       // If the key is the right arrow key, the current index is increased
       case 39: if (shipIndex%10 !== 9) shipIndex++
+        break
+      case 65: spawnAlien()
         break
     }
     // The ship is redrawn on the current index
