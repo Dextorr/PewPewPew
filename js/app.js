@@ -1,5 +1,5 @@
 $(() => {
-  
+
   const $gameBoard = $('#gameBoard')
   let shipIndex = 94
 
@@ -77,19 +77,19 @@ $(() => {
   }
 
   // Fires a shot from the player ship's current position:
-  function fireShot(){
+  function fireShot(shooterIndex, dir){
     // The shot is initially placed where the player ship is
-    let shotIndex = shipIndex
+    let shotIndex = shooterIndex
     // Interval for the shot's movement
     const shotTimer = setInterval(() => {
       // The shot is placed on the row above its current position...
-      $cells.eq(shotIndex - 10).addClass('shot')
+      $cells.eq(shotIndex + dir).addClass('shot')
       // ...removed from its current position...
       $cells.eq(shotIndex).removeClass('shot')
       // ...and current position is reassigned to new position
-      shotIndex -= 10
+      shotIndex += dir
       // When the shot has reached the top of the screen...
-      if (shotIndex<0){
+      if (shotIndex<0 || shotIndex>100){
         // ...the movement timer stops...
         clearInterval(shotTimer)
         // ...and the shot is removed from the gameboard
@@ -121,6 +121,6 @@ $(() => {
 
   $(document).on('keyup', e => {
     // If the spacebar is pressed, then a shot is fired
-    if(e.keyCode === 32) fireShot()
+    if(e.keyCode === 32) fireShot(shipIndex, -10)
   })
 })
