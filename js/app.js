@@ -42,6 +42,14 @@ $(() => {
     $cells.eq(index).removeClass('alien')
   }
 
+  // Alien randomly fires a shot
+  function alienShot(alienIndex){
+    const shotCheck = Math.random()
+    if (shotCheck > 0.75){
+      fireShot(alienIndex, 10)
+    }
+  }
+
   // Alien movement logic:
   function moveAlien(alienIndex){
     // Initial direction is right
@@ -64,12 +72,16 @@ $(() => {
         dir = 'right'
       // While direction is right...
       } else if (dir === 'right'){
-        // ...the alien moves one cell right
+        //...check if the alien will fire a shot...
+        alienShot(alienIndex)
+        // ...and the alien moves one cell right
         drawAlien(alienIndex, 1)
         alienIndex ++
       // While direction is left...
       } else if (dir === 'left'){
-        // ...the alien moves one cell left
+        //...check if the alien will fire a shot...
+        alienShot(alienIndex)
+        // ...and the alien moves one cell left
         drawAlien(alienIndex, -1)
         alienIndex --
       }
@@ -90,7 +102,6 @@ $(() => {
       shotIndex += dir
       // Collision detection
       if($cells.eq(shotIndex).hasClass('alien')){
-        console.log('HIT')
         $cells.eq(shotIndex).removeClass('alien')
         $cells.eq(shotIndex).removeClass('shot')
         clearInterval(alienMoveTimer)
