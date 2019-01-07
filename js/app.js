@@ -33,28 +33,31 @@ $(() => {
   function spawnAlien(){
     const alienIndex = Math.floor(Math.random() * 9)
     //Check that the area is clear for an alien to spawn and move into
-    if (!(isAlien(alienIndex) || isAlien(alienIndex + 1) || isAlien(alienIndex +2))){
-      drawAlien(alienIndex, 0)
+    if (!(isAlien(alienIndex) || isAlien(alienIndex + 1) || isAlien(alienIndex - 1))){
       const alien = {
+        'display': true,
         'index': alienIndex,
         'dir': 'right',
-        'shotOdds': 0.75
+        'shotOdds': 0
       }
+      drawAlien(alien, 1)
       aliens.push(alien)
       console.log(aliens)
     }
   }
 
   // Draws the alien on the next cell (n) and removes it from the current one (index)
-  function drawAlien(index, n){
-    $cells.eq(index).removeClass('alien')
-    $cells.eq(index + n).addClass('alien')
+  function drawAlien(alien, n){
+    if (alien.display){
+      $cells.eq(alien.index - n).removeClass('alien')
+      $cells.eq(alien.index).addClass('alien')
+    }
   }
 
   // Alien randomly fires a shot
   function alienShot(alien){
     const shotCheck = Math.random()
-    if (shotCheck > alien.shotOdds && !$cells.eq(alien.index + 10).hasClass('alien')){
+    if (shotCheck < alien.shotOdds && !$cells.eq(alien.index + 10).hasClass('alien')){
       fireShot(alien.index, 10)
     }
   }
@@ -66,15 +69,15 @@ $(() => {
       // When the alien reaches the right edge...
       if (alien.index%10 === 9 && Math.ceil((alien.index/10)%2) === 1){
         // ...it moves down a row...
-        drawAlien(alien.index, 10)
         alien.index += 10
+        drawAlien(alien, 10)
         // ...and reverses direction to left
         alien.dir = 'left'
         // When the alien reaches the left edge...
       } else if (alien.index%10 === 0 && (alien.index/10)%2 === 1){
         // ...it moves down a row...
-        drawAlien(alien.index, 10)
         alien.index += 10
+        drawAlien(alien, 10)
         // ...and reverses direction to right
         alien.dir = 'right'
         // While direction is right...
@@ -82,15 +85,15 @@ $(() => {
         //...check if the alien will fire a shot...
         alienShot(alien)
         // ...and the alien moves one cell right
-        drawAlien(alien.index, 1)
         alien.index ++
+        drawAlien(alien, 1)
         // While direction is left...
       } else if (alien.dir === 'left'){
         //...check if the alien will fire a shot...
         alienShot(alien)
         // ...and the alien moves one cell left
-        drawAlien(alien.index, -1)
         alien.index --
+        drawAlien(alien, -1)
       }
     })
   }, 500)
@@ -112,8 +115,8 @@ $(() => {
       if($cells.eq(shotIndex).hasClass('alien')){
         $cells.eq(shotIndex).removeClass('alien')
         $cells.eq(shotIndex).removeClass('shot')
-        console.log(aliens.find(alien => alien.index === shotIndex))
-        aliens.splice(aliens.find((alien) => alien.index === shotIndex), 1)
+        console.log(aliens.findIndex(alien => alien.index === shotIndex))
+        aliens[aliens.findIndex(alien => alien.index === shotIndex)].display = false
         console.log(aliens, shotIndex)
         clearInterval(shotTimer)
       }
