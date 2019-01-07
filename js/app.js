@@ -1,11 +1,18 @@
 $(() => {
 
   const $gameBoard = $('#gameBoard'),
+    $score = $('#scoreDisplay'),
+    $lives = $('#livesDisplay'),
     aliens = []
-  let shipIndex = 94
+  let shipIndex = 94,
+    score = 0,
+    lives = 3
 
   // TEMP just to see gameboard clearly for now
   $gameBoard.css({border: '5px solid #000'})
+
+  // Display the score and lives
+  $score.text(score)
 
   // Create a grid of 100 cells on the gameboard
   for (let i=0;i<100;i++){
@@ -38,7 +45,7 @@ $(() => {
         'display': true,
         'index': alienIndex,
         'dir': 'right',
-        'shotOdds': 0
+        'shotOdds': 1
       }
       drawAlien(alien, 1)
       aliens.push(alien)
@@ -57,8 +64,8 @@ $(() => {
   // Alien randomly fires a shot
   function alienShot(alien){
     const shotCheck = Math.random()
-    if (shotCheck < alien.shotOdds && !$cells.eq(alien.index + 10).hasClass('alien')){
-      fireShot(alien.index, 10)
+    if (shotCheck < alien.shotOdds && !$cells.eq(alien.index + 10).hasClass('alien') && alien.display){
+      fireShot(alien.index, 10, 'alienShot')
     }
   }
 
@@ -99,25 +106,40 @@ $(() => {
   }, 500)
 
   // Fires a shot from the player ship's current position:
-  function fireShot(shooterIndex, dir){
+  function fireShot(shooterIndex, dir, shotType = 'shot'){
     // The shot is initially placed where the player ship is
     let shotIndex = shooterIndex
+
     // Interval for the shot's movement
     const shotTimer = setInterval(() => {
       // The shot is placed on the row above its current position...
-      $cells.eq(shotIndex + dir).addClass('shot')
+      $cells.eq(shotIndex + dir).addClass(`${shotType}`)
       // ...removed from its current position...
-      $cells.eq(shotIndex).removeClass('shot')
+      $cells.eq(shotIndex).removeClass(`${shotType}`)
       // ...and current position is reassigned to new position
       shotIndex += dir
 
-      // Collision detection
-      if($cells.eq(shotIndex).hasClass('alien')){
+      // COLLISION DETECTION *******************************
+
+      // If a shot enters a cell with an alien in it...
+      if($cells.eq(shotIndex).hasClass('alien') && shotType === 'shot'){
+        // The player score is increased and updated...
+        score += 100
+        $score.text(score)
+        // It removes the alien and shot from the cell...
         $cells.eq(shotIndex).removeClass('alien')
-        $cells.eq(shotIndex).removeClass('shot')
+        $cells.eq(shotIndex).removeClass(`${shotType}`)
         console.log(aliens.findIndex(alien => alien.index === shotIndex))
+        // ...and changes the alien object's display property to false
         aliens[aliens.findIndex(alien => alien.index === shotIndex)].display = false
         console.log(aliens, shotIndex)
+        // The shot's progress towards the top of the screen ends
+        clearInterval(shotTimer)
+      }
+
+      if($cells.eq(shotIndex + dir).hasClass('shot') && $cells.eq(shotIndex).hasClass('alienShot')){
+        $cells.eq(shotIndex).removeClass('shot')
+        $cells.eq(shotIndex).removeClass('alienShot')
         clearInterval(shotTimer)
       }
 
@@ -126,7 +148,7 @@ $(() => {
         // ...the movement timer stops...
         clearInterval(shotTimer)
         // ...and the shot is removed from the gameboard
-        $cells.eq(shotIndex).removeClass('shot')
+        $cells.eq(shotIndex).removeClass(`${shotType}`)
       }
     }, 100)
 

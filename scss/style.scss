@@ -1,4 +1,16 @@
-$color: #f00;
+$red: #f00;
+$green: #0f0;
+@mixin shotStyle($color){
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    transparent calc(50% - 1.1px),
+    $color calc(50% - 1px),
+    $color calc(50% + 1px),
+    transparent calc(50% + 1.1px),
+    transparent 100%
+  );
+}
 
 * {
   box-sizing: border-box;
@@ -9,7 +21,7 @@ body {
 }
 
 h1 {
-  color: $color;
+  color: $red;
   text-align: center;
 }
 
@@ -42,15 +54,11 @@ h1 {
   }
 
   .shot{
-    background: linear-gradient(
-      to right,
-      transparent 0%,
-      transparent calc(50% - 1.1px),
-      #f00 calc(50% - 1px),
-      #f00 calc(50% + 1px),
-      transparent calc(50% + 1.1px),
-      transparent 100%
-    );
+    @include shotStyle($red)
+  }
+
+  .alienShot{
+    @include shotStyle($green)
   }
 
 }
