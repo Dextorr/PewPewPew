@@ -20,9 +20,13 @@ body {
   margin: 0;
 }
 
-h1 {
-  color: $red;
-  text-align: center;
+#overlay {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  background: rgba(0,0,0,0.9);
+  display: block;
 }
 
 #gameBoard {
