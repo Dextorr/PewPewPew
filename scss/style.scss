@@ -20,6 +20,11 @@ body {
   margin: 0;
 }
 
+header {
+  display: flex;
+  justify-content: space-around;
+}
+
 #overlay {
   width: 100vw;
   height: 100vh;
@@ -47,11 +52,6 @@ body {
   display: flex;
   flex-wrap: wrap;
 
-  .cell {
-    width: calc(100%/16);
-    height: calc(100%/16);
-  }
-
   .ship,
   .alien {
     background-position: center;
@@ -68,12 +68,12 @@ body {
     transform: scaleY(-1);
   }
 
-  .shot{
-    @include shotStyle($red)
-  }
-
   .alienShot{
     @include shotStyle($green)
+  }
+
+  .shot{
+    @include shotStyle($red)
   }
 
 }
