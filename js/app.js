@@ -15,7 +15,8 @@ let shipIndex = 248,
   score = 0,
   lives = 3,
   $cells,
-  shotDelay = false
+  shotDelay = false,
+  alienSpawner
 
 function init(){
   $gameBoard = $('#gameBoard')
@@ -54,7 +55,7 @@ function startGame(){
   $cells.eq(shipIndex).addClass('ship')
 
   // Spawn an alien on the top row every 1.5 seconds
-  const alienSpawner = setInterval(() => {
+  alienSpawner = setInterval(() => {
     spawnAlien()
   }, 1500)
 
@@ -172,9 +173,12 @@ function collision(shotIndex, shotType, dir, shotTimer){
     $cells.eq(shotIndex).removeClass('alienShot')
     lives -= 1
     $lives.text(lives)
+    clearInterval(gamePlaying)
+    clearInterval(alienSpawner)
   }
 
-  if($cells.eq(shotIndex + dir).hasClass('shot') && $cells.eq(shotIndex).hasClass('alienShot')){
+  if((cellCheck(shotIndex + dir, 'shot') || cellCheck(shotIndex + dir, 'alienShot')) ||
+    (cellCheck(shotIndex, 'shot') && cellCheck(shotIndex, 'alienShot'))) {
     $cells.eq(shotIndex).removeClass('shot')
     $cells.eq(shotIndex).removeClass('alienShot')
     clearInterval(shotTimer)
