@@ -27,6 +27,17 @@ body {
   top: 0;
   background: rgba(0,0,0,0.9);
   display: block;
+
+  h3 {
+    text-align: center;
+    color: #fff;
+  }
+
+  button {
+    text-align: center;
+    display: block;
+    margin: auto;
+  }
 }
 
 #gameBoard {
@@ -37,8 +48,8 @@ body {
   flex-wrap: wrap;
 
   .cell {
-    width: 10%;
-    height: 10%;
+    width: calc(100%/16);
+    height: calc(100%/16);
   }
 
   .ship,
