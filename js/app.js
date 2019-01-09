@@ -1,11 +1,13 @@
 
 // VARIABLES *******************************************************************
 
-const width = 16,
+const width = 10,
   $overlayMsg = $('<h3 />').text('Click Start to play.'),
   $startBtn = $('<button />').text('Start'),
   shipStart = Math.pow(width, 2) - Math.round(width/2),
-  startingLives = 3
+  startingLives = 3,
+  konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13],
+  codeCheckArr = []
 let shipIndex = shipStart,
   $gameBoard,
   $scoreDiv,
@@ -323,6 +325,7 @@ function keyupHandler(e){
     // ...and shotDelay is reassigned as false to allow another shot
     shotDelay = false
   }
+  codeCheck(e)
 }
 
 // STOPPING THE GAME ***********************************************************
@@ -340,6 +343,18 @@ function gameOver(){
   $startBtn.on('click', startGame)
   $overlay.css('display', 'block')
   pauseGame()
+}
+
+// CHEAT CODES *****************************************************************
+
+function codeCheck(e){
+  // ...that key's keycode is pushed to the keysPressed array
+  codeCheckArr.push(e.keyCode)
+  // this splice starts at 11 back from the end of the keysPressed array and removes everything before it
+  codeCheckArr.splice(-konamiCode.length - 1, codeCheckArr.length - konamiCode.length)
+  console.log(codeCheckArr)
+  // if the code is entered in correct sequence, then the alert is triggered
+  if (codeCheckArr.join('') === konamiCode.join('')) alert('Konami Code Recognised')
 }
 
 // DOM CONTENT EVENT LISTENER | INIT FUNCTION **********************************

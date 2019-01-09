@@ -93,78 +93,78 @@ header {
     }
 
     &[data-step="1"] {
-      background-position-x: -35px;
+      background-position-x: calc(100%/3);
       background-position-y: 0;
     }
 
     &[data-step="2"] {
-      background-position-x: -70px;
+      background-position-x: calc(200%/3);
       background-position-y: 0;
     }
 
     &[data-step="3"] {
-      background-position-x: -105px;
+      background-position-x: 100%;
       background-position-y: 0;
     }
 
     &[data-step="4"] {
       background-position-x: 0;
-      background-position-y: -35px;
+      background-position-y: calc(100%/3);
     }
 
     &[data-step="5"] {
-      background-position-x: -35px;
-      background-position-y: -35px;
+      background-position-x: calc(100%/3);
+      background-position-y: calc(100%/3);
     }
 
     &[data-step="6"] {
-      background-position-x: -70px;
-      background-position-y: -35px;
+      background-position-x: calc(200%/3);
+      background-position-y: calc(100%/3);
     }
 
     &[data-step="7"] {
-      background-position-x: -105px;
-      background-position-y: -35px;
+      background-position-x: 100%;
+      background-position-y: calc(100%/3);
     }
 
     &[data-step="8"] {
       background-position-x: 0;
-      background-position-y: -70px;
+      background-position-y: calc(200%/3);
     }
 
     &[data-step="9"] {
-      background-position-x: -35px;
-      background-position-y: -70px;
+      background-position-x: calc(100%/3);
+      background-position-y: calc(200%/3);
     }
 
     &[data-step="10"] {
-      background-position-x: -70px;
-      background-position-y: -70px;
+      background-position-x: calc(200%/3);
+      background-position-y: calc(200%/3);
     }
 
     &[data-step="11"] {
-      background-position-x: -105px;
-      background-position-y: -70px;
+      background-position-x: 100%;
+      background-position-y: calc(200%/3);
     }
 
     &[data-step="12"] {
       background-position-x: 0;
-      background-position-y: -105px;
+      background-position-y: 100%;
     }
 
     &[data-step="13"] {
-      background-position-x: -35px;
-      background-position-y: -105px;
+      background-position-x: calc(100%/3);
+      background-position-y: 100%;
     }
 
     &[data-step="14"] {
-      background-position-x: -70px;
-      background-position-y: -105px;
+      background-position-x: calc(200%/3);
+      background-position-y: 100%;
     }
 
     &[data-step="15"] {
-      background-position-x: -105px;
-      background-position-y: -105px;
+      background-position-x: 100%;
+      background-position-y: 100%;
     }
   }
 }
