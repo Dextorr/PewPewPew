@@ -18,11 +18,13 @@ $green: #0f0;
 
 body {
   margin: 0;
+  background-image: url(../assets/images/stars.gif)
 }
 
 header {
   display: flex;
   justify-content: space-around;
+  color: #fff;
 }
 
 #overlay {
@@ -32,6 +34,7 @@ header {
   top: 0;
   background: rgba(0,0,0,0.9);
   display: block;
+  z-index: 1;
 
   h3 {
     text-align: center;
@@ -51,6 +54,9 @@ header {
   margin: 10px auto;
   display: flex;
   flex-wrap: wrap;
+  z-index: 1;
+  border-radius: 10px;
+  border: 5px solid rgba(255, 255, 255, 0.5);
 
   .ship,
   .alien {
@@ -59,21 +65,106 @@ header {
     background-repeat: no-repeat;
   }
 
-  .ship{
+  .ship {
     background-image: url(../assets/images/player.png);
   }
 
-  .alien{
+  .alien {
     background-image: url(../assets/images/alien.png);
     transform: scaleY(-1);
   }
 
-  .alienShot{
+  .alienShot {
     @include shotStyle($green)
   }
 
-  .shot{
+  .shot {
     @include shotStyle($red)
   }
 
+  .explosion {
+    background-image: url(../assets/images/explosion.png);
+    background-repeat: no-repeat;
+    background-size: 370%;
+
+    &[data-step="0"] {
+      background-position-x: 0;
+      background-position-y: 0;
+    }
+
+    &[data-step="1"] {
+      background-position-x: -35px;
+      background-position-y: 0;
+    }
+
+    &[data-step="2"] {
+      background-position-x: -70px;
+      background-position-y: 0;
+    }
+
+    &[data-step="3"] {
+      background-position-x: -105px;
+      background-position-y: 0;
+    }
+
+    &[data-step="4"] {
+      background-position-x: 0;
+      background-position-y: -35px;
+    }
+
+    &[data-step="5"] {
+      background-position-x: -35px;
+      background-position-y: -35px;
+    }
+
+    &[data-step="6"] {
+      background-position-x: -70px;
+      background-position-y: -35px;
+    }
+
+    &[data-step="7"] {
+      background-position-x: -105px;
+      background-position-y: -35px;
+    }
+
+    &[data-step="8"] {
+      background-position-x: 0;
+      background-position-y: -70px;
+    }
+
+    &[data-step="9"] {
+      background-position-x: -35px;
+      background-position-y: -70px;
+    }
+
+    &[data-step="10"] {
+      background-position-x: -70px;
+      background-position-y: -70px;
+    }
+
+    &[data-step="11"] {
+      background-position-x: -105px;
+      background-position-y: -70px;
+    }
+
+    &[data-step="12"] {
+      background-position-x: 0;
+      background-position-y: -105px;
+    }
+
+    &[data-step="13"] {
+      background-position-x: -35px;
+      background-position-y: -105px;
+    }
+
+    &[data-step="14"] {
+      background-position-x: -70px;
+      background-position-y: -105px;
+    }
+
+    &[data-step="15"] {
+      background-position-x: -105px;
+      background-position-y: -105px;
+    }
+  }
 }

@@ -5,7 +5,7 @@ const width = 16,
   $overlayMsg = $('<h3 />').text('Click Start to play.'),
   $startBtn = $('<button />').text('Start'),
   shipStart = Math.pow(width, 2) - Math.round(width/2),
-  aliens = []
+  startingLives = 3
 let shipIndex = shipStart,
   $gameBoard,
   $scoreDiv,
@@ -14,11 +14,15 @@ let shipIndex = shipStart,
   $lives,
   $overlay,
   score = 0,
-  lives = 3,
+  lives = startingLives,
   $cells,
   shotDelay = false,
   alienSpawner,
-  shipActive = true
+  shipActive = false,
+  alienSpeed = 300,
+  alienSpawnRate = 1500,
+  aliens = [],
+  currentStep = 0
 
 function init(){
   $gameBoard = $('#gameBoard')
@@ -30,21 +34,6 @@ function init(){
 
   $overlay.append($overlayMsg)
   $overlay.append($startBtn)
-}
-
-// GAME START ******************************************************************
-
-function startGame(){
-  $overlay.css('display', 'none')
-  $score = $('<span />').addClass('scoreDisplay').appendTo($scoreDiv)
-  $lives = $('<span />').addClass('livesDisplay').appendTo($livesDiv)
-
-  // TEMP just to see gameboard clearly for now
-  $gameBoard.css({border: '1px solid #000'})
-
-  // Display the score and lives
-  $score.text(score)
-  $lives.text(lives)
 
   // Create a grid of cells on the gameboard
   for (let i=0;i<Math.pow(width, 2);i++){
@@ -55,8 +44,43 @@ function startGame(){
     $cell.addClass('cell').appendTo($gameBoard)
   }
 
+
   // Get array of each cell on the gameboard
   $cells = $('div.cell')
+
+  $score = $('<span />').addClass('scoreDisplay').appendTo($scoreDiv)
+  $lives = $('<span />').addClass('livesDisplay').appendTo($livesDiv)
+}
+
+// EXPLOSION SPRITE FUNCTION ***************************************************
+
+function explode(index){
+  $cells.eq(index).addClass('explosion')
+  const explosionTimer = setInterval(() => {
+    $cells.eq(index).attr('data-step', currentStep)
+    currentStep = currentStep === 15 ? 0 : currentStep += 1
+    if(currentStep === 0) {
+      $cells.eq(index).removeClass('explosion')
+      clearInterval(explosionTimer)
+    }
+  }, 50)
+}
+
+// GAME START ******************************************************************
+
+function startGame(){
+  $overlay.css('display', 'none')
+  shipActive = true
+  if(score !== 0) Array.from($cells).forEach(cell => cell.classList.remove('alien'))
+  score = 0
+  lives = startingLives
+  aliens = []
+
+
+  // Display the score and lives
+  $score.text(score)
+  $lives.text(lives)
+
 
   // Place player ship on initial cell
   moveShip()
@@ -66,7 +90,7 @@ function startGame(){
     if(shipActive){
       spawnAlien()
     }
-  }, 1500)
+  }, alienSpawnRate)
 
   addEvents()
 }
@@ -98,23 +122,24 @@ function cellCheck(index, className){
   return $cells.eq(index).hasClass(className)
 }
 
+// ALIENS **********************************************************************
+
 // Randomly places an alien on one of the cells of the first row excluding the furthest cell on the right...
 function spawnAlien(){
   const alienIndex = Math.floor(Math.random() * (width - 1))
   //Check that the area is clear for an alien to spawn and move into
   if (!(cellCheck(alienIndex, 'alien') || cellCheck((alienIndex, 'alien') + 1) || cellCheck((alienIndex, 'alien') - 1))){
+    // Alien object
     const alien = {
       'display': true,
       'index': alienIndex,
       'dir': 'right',
-      'shotOdds': .10
+      'shotOdds': 0.1
     }
     drawAlien(alien, 1)
     aliens.push(alien)
   }
 }
-
-// ALIENS **********************************************************************
 
 // Draws the alien on the next cell (n) and removes it from the current one (index)
 function drawAlien(alien, n){
@@ -128,18 +153,26 @@ function drawAlien(alien, n){
 function alienShot(alien){
   const shotCheck = Math.random()
   if (shotCheck < alien.shotOdds && !$cells.eq(alien.index + 10).hasClass('alien') && alien.display){
-    fireShot(alien.index, width, 100, 'alienShot')
+    fireShot(alien.index, width, 60, 'alienShot')
   }
 }
 
 // MAIN GAMEPLAY INTERVAL ******************************************************
 
-// Alien moves every half second
-setInterval(() => {
+// Alien moves according to alienSpeed variable
+const alienMove = setInterval(() => {
   // The aliens only move while the player ship is active
   if(shipActive){
     // Initial direction is right
-    aliens.forEach(alien => {
+    const liveAliens = aliens.filter(alien => alien.display)
+    liveAliens.forEach(alien => {
+
+      // Check if the alien has reached the bottom of the screen...
+      if (alien.index > Math.pow(width, 2) - width){
+        // ...and run the game over function if it is
+        gameOver()
+      }
+
       // When the alien reaches the right edge...
       if (alien.index%width === width-1 && Math.ceil((alien.index/width)%2) === 1){
         // ...it moves down a row...
@@ -171,7 +204,7 @@ setInterval(() => {
       }
     })
   }
-}, 250)
+}, alienSpeed)
 
 // COLLISION DETECTION *********************************************************
 
@@ -186,6 +219,8 @@ function collision(shotIndex, shotType, dir, shotTimer){
     // It removes the alien and shot from the cell...
     $cells.eq(shotIndex).removeClass('alien')
     $cells.eq(shotIndex).removeClass('shot')
+    // ...replaces it with the explosion sprite...
+    explode(shotIndex)
     // ...and changes the alien object's display property to false
     aliens[aliens.findIndex(alien => alien.index === shotIndex)].display = false
     // The shot's progress towards the top of the screen ends
@@ -218,7 +253,8 @@ function collision(shotIndex, shotType, dir, shotTimer){
 
   // SHOT COLLISION
   // NOT WORKING AS EXPECTED...
-  if( cellCheck(shotIndex + dir*2, 'shot') && shotType === 'alienShot' ) {
+  if( cellCheck(shotIndex + dir, 'shot') && shotType === 'alienShot' ) {
+    console.log('HIT', shotIndex)
     $cells.eq(shotIndex).removeClass('alienShot')
     clearInterval(shotTimer)
   }
@@ -271,7 +307,7 @@ function keydownHandler(e){
     case 32: if (shotDelay === false){
       shotDelay = setInterval(() => {
         fireShot(shipIndex, -width, 40)
-      }, 400)
+      }, 500)
     }
       break
   }
@@ -294,13 +330,14 @@ function keyupHandler(e){
 function pauseGame(){
   shipActive = false
   // setTimeout(shipsActive=true, 2000)
-  $(document).off()
+  $(document).off('keydown')
 }
 
 function gameOver(){
+  $(document).off('keyup')
   $overlayMsg.text('Game Over')
-  $startBtn.off()
-  // $startBtn.on('click', )
+  $startBtn.off().text('Play again')
+  $startBtn.on('click', startGame)
   $overlay.css('display', 'block')
   pauseGame()
 }
