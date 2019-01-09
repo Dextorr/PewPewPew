@@ -211,6 +211,7 @@ function alienShot(alien){
 
 // Alien moves according to alienSpeed variable
 function alienMove(){
+  let moveTimer
   // The aliens only move while the player ship is active
   if(shipActive){
     const liveAliens = aliens.filter(alien => alien.display)
@@ -218,7 +219,9 @@ function alienMove(){
       alien.move()
       alienShot(alien)
     })
-    setTimeout(alienMove, alienSpeed)
+    moveTimer = setTimeout(alienMove, alienSpeed)
+  } else {
+    clearInterval(moveTimer)
   }
 }
 
@@ -265,6 +268,7 @@ function collision(shotIndex, shotType, dir, shotTimer){
           shipActive = true
           shipIndex = shipStart
           moveShip()
+          alienMove()
           addEvents()
         }
       })
@@ -384,7 +388,6 @@ function codeCheck(e){
   codeCheckArr.push(e.keyCode)
   // this splice starts at 11 back from the end of the array and removes everything before it
   codeCheckArr.splice(-konamiCode.length - 1, codeCheckArr.length - konamiCode.length)
-  console.log(codeCheckArr)
   // if the code is entered in correct sequence, the player gets 5 extra lives
   if (codeCheckArr.join('') === konamiCode.join('')){
     lives += 5
