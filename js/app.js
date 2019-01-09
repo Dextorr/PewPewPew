@@ -1,19 +1,20 @@
 
 // VARIABLES *******************************************************************
 
-const width = 10,
-  $overlayMsg = $('<h3 />').text('Click Start to play.'),
-  $startBtn = $('<button />').text('Start'),
+const width = 16,
   shipStart = Math.pow(width, 2) - Math.round(width/2),
-  startingLives = 3,
+  startingLives = 1,
   konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13],
   codeCheckArr = []
 let shipIndex = shipStart,
+  $overlayTitle,
+  $overlaySubtitle,
+  $overlayMsg,
+  $startBtn,
   $gameBoard,
   $scoreDiv,
   $score,
   $livesDiv,
-  $lives,
   $overlay,
   score = 0,
   lives = startingLives,
@@ -21,21 +22,29 @@ let shipIndex = shipStart,
   shotDelay = false,
   alienSpawner,
   shipActive = false,
-  alienSpeed = 300,
+  alienSpeed = 500,
   alienSpawnRate = 1500,
   aliens = [],
-  currentStep = 0
+  currentStep = 0,
+  firstGame = true
 
 function init(){
   $gameBoard = $('#gameBoard')
   $overlay = $('#overlay')
   $scoreDiv = $('div.score').text('Score: ')
-  $livesDiv = $('div.lives').text('Lives: ')
+  $livesDiv = $('div.lives')
 
-  $startBtn.on('click', startGame)
 
-  $overlay.append($overlayMsg)
-  $overlay.append($startBtn)
+  $overlay.html('<h1>PewPewPew</h1>' +
+    '<h2>Protect the planet!</h2>' +
+    '<h3>Click Start or press Enter to play</h3>' +
+    '<button>Start</button>')
+
+  $overlayTitle = $overlay.find('h1')
+  $overlaySubtitle = $overlay.find('h2')
+  $overlayMsg = $overlay.find('h3')
+  $startBtn = $overlay.find('button')
+  startEvents()
 
   // Create a grid of cells on the gameboard
   for (let i=0;i<Math.pow(width, 2);i++){
@@ -51,21 +60,13 @@ function init(){
   $cells = $('div.cell')
 
   $score = $('<span />').addClass('scoreDisplay').appendTo($scoreDiv)
-  $lives = $('<span />').addClass('livesDisplay').appendTo($livesDiv)
 }
 
-// EXPLOSION SPRITE FUNCTION ***************************************************
-
-function explode(index){
-  $cells.eq(index).addClass('explosion')
-  const explosionTimer = setInterval(() => {
-    $cells.eq(index).attr('data-step', currentStep)
-    currentStep = currentStep === 15 ? 0 : currentStep += 1
-    if(currentStep === 0) {
-      $cells.eq(index).removeClass('explosion')
-      clearInterval(explosionTimer)
-    }
-  }, 50)
+function startEvents(){
+  $startBtn.on('click', startGame)
+  $(document).on('keyup', e => {
+    if (e.keyCode === 13) startGame()
+  })
 }
 
 // GAME START ******************************************************************
@@ -73,7 +74,8 @@ function explode(index){
 function startGame(){
   $overlay.css('display', 'none')
   shipActive = true
-  if(score !== 0) Array.from($cells).forEach(cell => cell.classList.remove('alien'))
+  if(!firstGame) Array.from($cells).forEach(cell => cell.classList.remove('alien'))
+  firstGame = false
   score = 0
   lives = startingLives
   aliens = []
@@ -81,7 +83,7 @@ function startGame(){
 
   // Display the score and lives
   $score.text(score)
-  $lives.text(lives)
+  updateLives()
 
 
   // Place player ship on initial cell
@@ -93,6 +95,9 @@ function startGame(){
       spawnAlien()
     }
   }, alienSpawnRate)
+
+  // Move the aliens
+  alienMove()
 
   addEvents()
 }
@@ -111,6 +116,17 @@ function addEvents(){
   $(document).on('keyup', e => {
     keyupHandler(e)
   })
+}
+
+// UPDATE LIVES ****************************************************************
+
+function updateLives(){
+  $livesDiv.empty()
+  for(let i=0;i<lives;i++){
+    const $lifeDiv = $('<div />').addClass('life')
+    $lifeDiv.html('<img src="assets/images/player.png">')
+    $livesDiv.append($lifeDiv)
+  }
 }
 
 // SHIP MOVEMENT ***************************************************************
@@ -136,7 +152,39 @@ function spawnAlien(){
       'display': true,
       'index': alienIndex,
       'dir': 'right',
-      'shotOdds': 0.1
+      'shotOdds': 0.2,
+      'move': function(){
+        // Check if the alien has reached the bottom of the screen...
+        if (this.index > Math.pow(width, 2) - width){
+          // ...and run the game over function if it is
+          gameOver()
+        }
+        // When the alien reaches the right edge...
+        if (this.index%width === width-1 && Math.ceil((this.index/width)%2) === 1){
+          // ...it moves down a row...
+          this.index += width
+          drawAlien(this, width)
+          // ...and reverses direction to left
+          this.dir = 'left'
+          // When the alien reaches the left edge...
+        } else if (this.index%width === 0 && (this.index/width)%2 === 1){
+          // ...it moves down a row...
+          this.index += width
+          drawAlien(this, width)
+          // ...and reverses direction to right
+          this.dir = 'right'
+          // While direction is right...
+        } else if (this.dir === 'right'){
+          // ...and the alien moves one cell right
+          this.index ++
+          drawAlien(this, 1)
+          // While direction is left...
+        } else if (this.dir === 'left'){
+          // ...the alien moves one cell left
+          this.index --
+          drawAlien(this, -1)
+        }
+      }
     }
     drawAlien(alien, 1)
     aliens.push(alien)
@@ -159,54 +207,20 @@ function alienShot(alien){
   }
 }
 
-// MAIN GAMEPLAY INTERVAL ******************************************************
+// ALIEN MOVE ******************************************************************
 
 // Alien moves according to alienSpeed variable
-const alienMove = setInterval(() => {
+function alienMove(){
   // The aliens only move while the player ship is active
   if(shipActive){
-    // Initial direction is right
     const liveAliens = aliens.filter(alien => alien.display)
     liveAliens.forEach(alien => {
-
-      // Check if the alien has reached the bottom of the screen...
-      if (alien.index > Math.pow(width, 2) - width){
-        // ...and run the game over function if it is
-        gameOver()
-      }
-
-      // When the alien reaches the right edge...
-      if (alien.index%width === width-1 && Math.ceil((alien.index/width)%2) === 1){
-        // ...it moves down a row...
-        alien.index += width
-        drawAlien(alien, width)
-        // ...and reverses direction to left
-        alien.dir = 'left'
-        // When the alien reaches the left edge...
-      } else if (alien.index%width === 0 && (alien.index/width)%2 === 1){
-        // ...it moves down a row...
-        alien.index += width
-        drawAlien(alien, width)
-        // ...and reverses direction to right
-        alien.dir = 'right'
-        // While direction is right...
-      } else if (alien.dir === 'right'){
-        //...check if the alien will fire a shot...
-        alienShot(alien)
-        // ...and the alien moves one cell right
-        alien.index ++
-        drawAlien(alien, 1)
-        // While direction is left...
-      } else if (alien.dir === 'left'){
-        //...check if the alien will fire a shot...
-        alienShot(alien)
-        // ...and the alien moves one cell left
-        alien.index --
-        drawAlien(alien, -1)
-      }
+      alien.move()
+      alienShot(alien)
     })
+    setTimeout(alienMove, alienSpeed)
   }
-}, alienSpeed)
+}
 
 // COLLISION DETECTION *********************************************************
 
@@ -218,14 +232,14 @@ function collision(shotIndex, shotType, dir, shotTimer){
     // The player score is increased and updated...
     score += 100
     $score.text(score)
-    // It removes the alien and shot from the cell...
+    // ...alien object's display property set to false
+    aliens[aliens.findIndex(alien => alien.index === shotIndex)].display = false
+    // Remove the alien and shot from the cell...
     $cells.eq(shotIndex).removeClass('alien')
     $cells.eq(shotIndex).removeClass('shot')
     // ...replaces it with the explosion sprite...
     explode(shotIndex)
-    // ...and changes the alien object's display property to false
-    aliens[aliens.findIndex(alien => alien.index === shotIndex)].display = false
-    // The shot's progress towards the top of the screen ends
+    // ...and shot's progress towards the top of the screen ends
     clearInterval(shotTimer)
   }
   if(cellCheck(shotIndex, 'alien') && shotType === 'alienShot'){
@@ -235,13 +249,17 @@ function collision(shotIndex, shotType, dir, shotTimer){
 
   // PLAYER HIT
   if (cellCheck(shotIndex, 'ship') && shotType === 'alienShot'){
-    if(lives === 0) gameOver()
-    else {
-      $cells.eq(shipIndex).removeClass('ship')
-      $cells.eq(shotIndex).removeClass('alienShot')
-      lives -= 1
-      $lives.text(lives)
-      pauseGame()
+    pauseGame()
+    explode(shipIndex)
+    $cells.eq(shipIndex).removeClass('ship')
+    $cells.eq(shotIndex).removeClass('alienShot')
+    lives -= 1
+    updateLives()
+    if(lives === 0){
+      setTimeout(() => {
+        gameOver()
+      }, 700)
+    } else {
       $(document).on('keyup', e => {
         if(e.keyCode === 13){
           shipActive = true
@@ -293,6 +311,20 @@ function fireShot(shooterIndex, dir, shotSpeed, shotType = 'shot'){
   }, shotSpeed)
 }
 
+// EXPLOSION SPRITE FUNCTION ***************************************************
+
+function explode(index){
+  $cells.eq(index).addClass('explosion')
+  const explosionTimer = setInterval(() => {
+    $cells.eq(index).attr('data-step', currentStep)
+    currentStep = currentStep === 15 ? 0 : currentStep += 1
+    if(currentStep === 0) {
+      $cells.eq(index).removeClass('explosion')
+      clearInterval(explosionTimer)
+    }
+  }, 30)
+}
+
 // EVENT HANDLERS **************************************************************
 
 function keydownHandler(e){
@@ -340,7 +372,7 @@ function gameOver(){
   $(document).off('keyup')
   $overlayMsg.text('Game Over')
   $startBtn.off().text('Play again')
-  $startBtn.on('click', startGame)
+  startEvents()
   $overlay.css('display', 'block')
   pauseGame()
 }
@@ -348,13 +380,16 @@ function gameOver(){
 // CHEAT CODES *****************************************************************
 
 function codeCheck(e){
-  // ...that key's keycode is pushed to the keysPressed array
+  // Keycode is pushed to codeCheckArr
   codeCheckArr.push(e.keyCode)
-  // this splice starts at 11 back from the end of the keysPressed array and removes everything before it
+  // this splice starts at 11 back from the end of the array and removes everything before it
   codeCheckArr.splice(-konamiCode.length - 1, codeCheckArr.length - konamiCode.length)
   console.log(codeCheckArr)
-  // if the code is entered in correct sequence, then the alert is triggered
-  if (codeCheckArr.join('') === konamiCode.join('')) alert('Konami Code Recognised')
+  // if the code is entered in correct sequence, the player gets 5 extra lives
+  if (codeCheckArr.join('') === konamiCode.join('')){
+    lives += 5
+    updateLives()
+  }
 }
 
 // DOM CONTENT EVENT LISTENER | INIT FUNCTION **********************************
