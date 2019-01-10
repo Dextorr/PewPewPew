@@ -1,7 +1,7 @@
 
 // VARIABLES *******************************************************************
 
-const width = 16,
+const width = 10,
   shipStart = Math.pow(width, 2) - Math.round(width/2),
   startingLives = 3,
   konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13],
@@ -31,9 +31,11 @@ let shipIndex = shipStart,
   currentStep = 0,
   firstGame = true,
   level = 1,
-  scores
+  $highScrForm,
+  $highScrInput,
+  $submitBtn,
+  scores = []
 
-localStorage.setItem('highScores', JSON.stringify(scores))
 
 function init(){
   $gameBoard = $('#gameBoard')
@@ -41,17 +43,26 @@ function init(){
   $overlay = $('#overlay')
   $scoreDiv = $('div.score').text('Score: ')
   $livesDiv = $('div.lives')
-
+  scores = JSON.parse(localStorage.getItem('High Scores'))
+  console.log(scores)
 
   $overlay.html('<h1>PewPewPew</h1>' +
     '<h2>Protect the planet!</h2>' +
     '<h3>Click Start or press Enter to play</h3>' +
-    '<button>Start</button>')
+    '<button class="startBtn">Start</button>' +
+    '<form>' +
+      '<input name="name" placeholder="Please enter your name."></input>' +
+      '<button class="submit">Submit</button>' +
+    '</form>')
+
+  $highScrForm = $('form').hide()
+  $highScrInput = $highScrForm.find('input')
+  $submitBtn = $highScrForm.find('button.submit')
 
   $overlayTitle = $overlay.find('h1')
   $overlaySubtitle = $overlay.find('h2')
   $overlayMsg = $overlay.find('h3')
-  $startBtn = $overlay.find('button')
+  $startBtn = $overlay.find('button.startBtn')
   startEvents()
 
   // Create a grid of cells on the gameboard
@@ -80,10 +91,8 @@ function startEvents(){
 // GAME START ******************************************************************
 
 function startGame(){
-  $overlay.css('display', 'none')
+  $overlay.hide()
   shipActive = true
-  if(!firstGame) Array.from($cells).forEach(cell => cell.classList.remove('alien'))
-  firstGame = false
   score = 0
   level = 1
   lives = startingLives
@@ -91,6 +100,11 @@ function startGame(){
   alienSpeed = alienStartingSpeed
   alienSpawnRate = initAlienSpawnRate
 
+  // Check if this is the first game, and if it isn't clear all the aliens from the board
+  if(!firstGame) Array.from($cells).forEach(cell => cell.classList.remove('alien'))
+  // If it is the first game, start the spawn alien function, this only runs on the first game as it is recursive
+  else spawnAlien()
+  firstGame = false
 
   // Display the score and lives
   $score.text(score)
@@ -100,13 +114,6 @@ function startGame(){
   // Place player ship on initial cell
   moveShip()
 
-  spawnAlien()
-  // Spawn an alien on the top row every 1.5 seconds
-  // alienSpawner = setInterval(() => {
-  //   if(shipActive){
-  //     spawnAlien()
-  //   }
-  // }, alienSpawnRate)
 
   // Move the aliens
   alienMove()
@@ -158,6 +165,7 @@ function cellCheck(index, className){
 function spawnAlien(){
   if (shipActive){
     const alienIndex = Math.floor(Math.random() * (width - 1))
+    console.log(alienIndex)
     //Check that the area is clear for an alien to spawn and move into
     if (!(cellCheck(alienIndex, 'alien') || cellCheck((alienIndex, 'alien') + 1) || cellCheck((alienIndex, 'alien') - 1))){
       // Alien object
@@ -169,11 +177,6 @@ function spawnAlien(){
         'move': function(){
           const prevIndex = this.index
           let move
-          // Check if the alien has reached the bottom of the screen...
-          if (this.index > Math.pow(width, 2) - width){
-            // ...and run the game over function if it is
-            gameOver()
-          }
           // When the alien reaches the right edge...
           if (this.index%width === width-1 && Math.ceil((this.index/width)%2) === 1){
             // ...it moves down a row...
@@ -209,6 +212,12 @@ function spawnAlien(){
             $cells.eq(prevIndex).removeClass('alien')
           // If it wasn't blown up, then draw it on the next cell
           } else drawAlien(this, move)
+          // Check if the alien has reached the bottom of the screen...
+          if (this.index >= Math.pow(width, 2) - width){
+            // ...and run the game over function if it is
+            console.log(Math.pow(width, 2) - width)
+            gameOver()
+          }
         }
       }
       drawAlien(alien, 1)
@@ -432,11 +441,40 @@ function gameOver(){
   $(document).off('keyup')
   $overlayTitle.text('Game Over')
   $overlaySubtitle.text(`You scored ${score} points`)
-  lives === 0 ? $overlayMsg.text('Your defences have been utterly defeated.') : $overlayMsg.text('The aliens slipped past your front line and managed to take out your defences from within.')
+  lives === 0 ? $overlayMsg.text('Your defences have been utterly defeated, because you didn\'t pew hard enough') : $overlayMsg.text('The aliens slipped past your front line and managed to take out your defences from within.')
   $startBtn.off().text('Play again')
-  startEvents()
-  $overlay.css('display', 'block')
+  if (score > Math.min(...scores.map(score => score.score)) || scores.length < 10) {
+    setHighScore()
+  } else startEvents()
+  $overlay.show()
   pauseGame()
+}
+
+function setHighScore(){
+  $overlayMsg.text('That\'s a high score!')
+  $startBtn.hide()
+  $highScrForm.show()
+  $highScrForm.on('submit', (e) => {
+    formHandler(e)
+  })
+}
+
+function formHandler(e){
+  e.preventDefault()
+  if($highScrInput.val() !== ''){
+    $highScrInput.css('border', 'none')
+    const newHighScr = {'name': $highScrInput.val(), 'score': score}
+    scores.push(newHighScr)
+    scores.sort((a, b) => b.score - a.score)
+    if (scores.length > 10) scores.splice(10)
+    localStorage.setItem('High Scores', JSON.stringify(scores))
+    $highScrForm.hide()
+    $startBtn.off().show()
+    setTimeout(startEvents, 100)
+  } else {
+    $highScrInput.attr('placeholder', 'Blank high score names aren\'t allowed!')
+      .css('border', 'solid 5px #f00')
+  }
 }
 
 // CHEAT CODES *****************************************************************
