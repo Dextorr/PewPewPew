@@ -177,3 +177,28 @@ header {
     }
   }
 }
+
+.gameBoardMsg {
+  color: #fff;
+  position: absolute;
+  top: 40vh;
+  left: calc(50vw - 300px);
+  font-size: 3em;
+  text-align: center;
+  width: 600px;
+
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1.0;
+  }
+  100% {
+    opacity: 0.0;
+  }
+}
+
+.pause {
+  animation: blink 1s infinite;
+  animation-timing-function: cubic-bezier(1.0, 0, 0, 1.0);
+}
