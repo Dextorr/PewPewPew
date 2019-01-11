@@ -1,7 +1,7 @@
 
 // VARIABLES *******************************************************************
 
-const width = 16,
+const width = 20,
   shipStart = Math.pow(width, 2) - Math.round(width/2),
   startingLives = 3,
   konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13],
@@ -34,7 +34,6 @@ let shipIndex = shipStart,
   level = 1,
   $highScrForm,
   $highScrInput,
-  $submitBtn,
   scores = [],
   pew1,
   pew2,
@@ -151,10 +150,12 @@ function addEvents(){
 
   //When a key is pressed down...
   $(document).on('keydown', e => {
+    e.preventDefault()
     keydownHandler(e)
   })
 
   $(document).on('keyup', e => {
+    e.preventDefault()
     keyupHandler(e)
   })
 }
