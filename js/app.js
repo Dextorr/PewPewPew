@@ -1,14 +1,13 @@
 
 // VARIABLES *******************************************************************
 
-const width = 20,
+const width = 16,
   shipStart = Math.pow(width, 2) - Math.round(width/2),
   startingLives = 3,
   konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13],
   codeCheckArr = [],
   alienStartingSpeed = 500,
-  initAlienSpawnRate = 1500,
-  levelUp = 2000
+  initAlienSpawnRate = 1500
 let shipIndex = shipStart,
   $overlayTitle,
   $overlaySubtitle,
@@ -40,7 +39,8 @@ let shipIndex = shipStart,
   explosion,
   laserCharge,
   $scoreBoard,
-  $highScores
+  $highScores,
+  levelUp = 2000
 
 
 function init(){
@@ -150,12 +150,10 @@ function addEvents(){
 
   //When a key is pressed down...
   $(document).on('keydown', e => {
-    e.preventDefault()
     keydownHandler(e)
   })
 
   $(document).on('keyup', e => {
-    e.preventDefault()
     keyupHandler(e)
   })
 }
@@ -188,7 +186,6 @@ function cellCheck(index, className){
 function spawnAlien(){
   if (shipActive){
     const alienIndex = Math.floor(Math.random() * (width - 1))
-    console.log(alienIndex)
     //Check that the area is clear for an alien to spawn and move into
     if (!(cellCheck(alienIndex, 'alien') || cellCheck((alienIndex, 'alien') + 1) || cellCheck((alienIndex, 'alien') - 1))){
       // Alien object
@@ -197,6 +194,7 @@ function spawnAlien(){
         'index': alienIndex,
         'dir': 'right',
         'shotOdds': 0.1,
+        'points': 100,
         'move': function(){
           const prevIndex = this.index
           let move
@@ -228,8 +226,9 @@ function spawnAlien(){
           // Check if the alien was blown up on the previous cell...
           if(cellCheck(prevIndex, 'explosion')){
             // ...update the score...
-            updateScore(100)
             // ...and remove the alien from the game.
+            updateScore(this.points*level)
+            console.log(this.points, level)
             this.display = false
             $cells.eq(this.index).removeClass('alien')
             $cells.eq(prevIndex).removeClass('alien')
@@ -238,7 +237,6 @@ function spawnAlien(){
           // Check if the alien has reached the bottom of the screen...
           if (this.index >= Math.pow(width, 2) - width){
             // ...and run the game over function if it is
-            console.log(Math.pow(width, 2) - width)
             gameOver()
           }
         }
@@ -288,12 +286,14 @@ function alienMove(){
 
 function updateScore(points){
   // The player score is increased and updated...
+  console.log(points)
   score += points
   $score.text(score)
-  if (score%levelUp === 0 && alienSpawnRate > 100) {
+  if (score/levelUp > level && alienSpawnRate > 100) {
     alienSpawnRate -= 100
     if(alienSpeed > 50) alienSpeed -= 50
     level += 1
+    levelUp = 2000 * level
     $gameBoardMsg.html(`<h3>Level ${level}</h3><h5>Alien speed up!</h5>`)
     setTimeout(() => {
       $gameBoardMsg.text('')
@@ -308,10 +308,10 @@ function collision(shotIndex, shotType, dir, shotTimer){
   //ALIEN HIT
   // If a shot enters a cell with an alien in it...
   if(cellCheck(shotIndex, 'alien') && shotType === 'shot'){
-    updateScore(100)
     // ...alien object's display property set to false
     const shotAlien = aliens[aliens.findIndex(alien => alien.index === shotIndex)]
     shotAlien.display = false
+    updateScore(shotAlien.points*level)
     // Remove the alien and shot from the cell...
     $cells.eq(shotIndex).removeClass('alien')
     $cells.eq(shotIndex).removeClass('shot')
@@ -415,18 +415,21 @@ function keydownHandler(e){
   switch(e.keyCode){
     // If the key is the left arrow key, the current index is decreased
     case 37: if (shipIndex%width !== 0) {
+      e.preventDefault()
       shipIndex--
       $cells.addClass('left')
     }
       break
     // If the key is the right arrow key, the current index is increased
     case 39: if (shipIndex%width !== width-1) {
+      e.preventDefault()
       shipIndex++
       $cells.addClass('right')
     }
       break
     // If the spacebar is held down, then a shot is fired on an interval to prevent rapid presses
     case 32: if (shotDelay === false){
+      e.preventDefault()
       $cells.eq(shipIndex).addClass('charging')
       laserCharge.currentTime = 0
       laserCharge.play()
@@ -522,7 +525,7 @@ function formHandler(e){
     setTimeout(startEvents, 100)
   } else {
     $highScrInput.val('')
-    $highScrInput.attr('placeholder', 'That name isn\'t allowed!')
+    $highScrInput.attr('placeholder', 'That name isn\'t allowed! (no spaces)')
       .css('border', 'solid 5px #f00')
   }
 }
