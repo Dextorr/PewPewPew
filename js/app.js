@@ -73,7 +73,6 @@ function init(){
 
   $highScrForm = $('form').hide()
   $highScrInput = $highScrForm.find('input')
-  $submitBtn = $highScrForm.find('button.submit')
   $highScrForm.on('submit', (e) => {
     formHandler(e)
   })
