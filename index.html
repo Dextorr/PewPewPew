@@ -3,12 +3,15 @@
   <head>
     <meta charset="utf-8">
     <title>Pew Pew Pew</title>
+    <link rel="icon" type="image/png" href="assets/images/player.png">
+    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="js/app.js" charset="utf-8"></script>
   </head>
   <body>
     <header>
+      <h1></h1>
       <div class="score">
       </div>
       <div class="lives">
@@ -16,8 +19,22 @@
     </header>
     <main>
       <div id="overlay">
+        <table class="scoreBoard">
+          <thead>
+            <tr>
+              <th colspan="2">High Scores</th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
       </div>
       <div id="gameBoard"></div>
     </main>
+    <audio src="assets/sounds/pew1.wav" class="playerShotSfx"></audio>
+    <audio src="assets/sounds/pew2.wav" class="alienShotSfx"></audio>
+    <audio src="assets/sounds/laser_charge.wav" class="laserChargeSfx"></audio>
+    <audio src="assets/sounds/splosion.wav" class="explosionSfx"></audio>
   </body>
 </html>

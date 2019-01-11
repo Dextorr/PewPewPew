@@ -18,15 +18,22 @@ $green: #0f0;
 
 body {
   margin: 0;
-  background-image: url(../assets/images/stars.gif)
+  background-image: url(../assets/images/stars.gif);
+  font-family: Orbitron, monospace;
 }
 
 header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
-  align-items: flex-end;
+  align-items: center;
   color: #fff;
-  height: 7vh;
+  height: 15vh;
+
+  h1 {
+    width: 100%;
+    text-align: center;
+  }
 
   .life {
     width: 50px;
@@ -45,15 +52,65 @@ header {
   position: absolute;
   top: 0;
   background: rgba(0,0,0,0.9);
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
   text-align: center;
   color: #fff;
 
+  form {
+    width: 90%;
+  }
+
   button {
     text-align: center;
+    width: 15%;
+    padding: 2%;
+    margin: 5% auto;
+    border-radius: 15px;
+    font-size: 1.2em;
     display: block;
-    margin: auto;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:hover {
+      background: #555;
+      color: #fff;
+    }
+  }
+
+  input {
+    font-size: 1.2em;
+    width: 50%;
+    text-align: center;
+    border-radius: 25px;
+    padding: 2%;
+
+    &:focus{
+      outline: none;
+      background: #ccc;
+    }
+  }
+
+  table.scoreBoard {
+    width: 20%;
+    color: #000;
+    font-weight: 800;
+    font-size: 1.2em;
+  }
+
+  tr {
+    background: #fff;
+  }
+
+  th,
+  td {
+    padding: 2%;
   }
 }
 
@@ -76,6 +133,20 @@ header {
 
   .ship {
     background-image: url(../assets/images/player.png);
+    transition: box-shadow 0.5s ease, transform 0.3s ease;
+    border-radius: 100%;
+
+    &.charging {
+      box-shadow: inset 0px 25px 15px -15px red;
+    }
+
+    &.right{
+      transform: skew(10deg, 20deg)
+    }
+
+    &.left{
+      transform: skew(-10deg, -20deg)
+    }
   }
 
   .alien {
@@ -187,6 +258,9 @@ header {
   text-align: center;
   width: 600px;
 
+  & h3, h5{
+    margin: 0;
+  }
 }
 
 @keyframes blink {

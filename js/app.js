@@ -1,7 +1,7 @@
 
 // VARIABLES *******************************************************************
 
-const width = 10,
+const width = 16,
   shipStart = Math.pow(width, 2) - Math.round(width/2),
   startingLives = 3,
   konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13],
@@ -14,6 +14,7 @@ let shipIndex = shipStart,
   $overlaySubtitle,
   $overlayMsg,
   $startBtn,
+  $title,
   $gameBoard,
   $gameBoardMsg,
   $scoreDiv,
@@ -34,30 +35,49 @@ let shipIndex = shipStart,
   $highScrForm,
   $highScrInput,
   $submitBtn,
-  scores = []
+  scores = [],
+  pew1,
+  pew2,
+  explosion,
+  laserCharge,
+  $scoreBoard,
+  $highScores
 
 
 function init(){
+  $title = $('header h1')
   $gameBoard = $('#gameBoard')
   $gameBoardMsg = $('<div />').appendTo($('main')).addClass('gameBoardMsg')
   $overlay = $('#overlay')
-  $scoreDiv = $('div.score').text('Score: ')
+  $scoreDiv = $('div.score').text('Score: ').hide()
   $livesDiv = $('div.lives')
-  scores = JSON.parse(localStorage.getItem('High Scores'))
-  console.log(scores)
+  pew1 = document.querySelector('audio.playerShotSfx')
+  pew2 = document.querySelector('audio.alienShotSfx')
+  explosion = document.querySelector('audio.explosionSfx')
+  laserCharge = document.querySelector('audio.laserChargeSfx')
+  if( JSON.parse( localStorage.getItem('High Scores') ) ) {
+    scores = JSON.parse(localStorage.getItem('High Scores'))
+  }
+  $scoreBoard = $('table.scoreBoard')
+  $highScores = $scoreBoard.find('tbody')
+  updateHighScores()
 
-  $overlay.html('<h1>PewPewPew</h1>' +
-    '<h2>Protect the planet!</h2>' +
+
+  $overlay.prepend('<h1>PewPewPew</h1>' +
+    '<h2>Stop those aliens!</h2>' +
     '<h3>Click Start or press Enter to play</h3>' +
     '<button class="startBtn">Start</button>' +
     '<form>' +
-      '<input name="name" placeholder="Please enter your name."></input>' +
+      '<input name="name" placeholder="Please enter your name." autofocus></input>' +
       '<button class="submit">Submit</button>' +
     '</form>')
 
   $highScrForm = $('form').hide()
   $highScrInput = $highScrForm.find('input')
   $submitBtn = $highScrForm.find('button.submit')
+  $highScrForm.on('submit', (e) => {
+    formHandler(e)
+  })
 
   $overlayTitle = $overlay.find('h1')
   $overlaySubtitle = $overlay.find('h2')
@@ -91,7 +111,9 @@ function startEvents(){
 // GAME START ******************************************************************
 
 function startGame(){
+  $title.text('PewPewPew')
   $overlay.hide()
+  $scoreDiv.show()
   shipActive = true
   score = 0
   level = 1
@@ -101,7 +123,7 @@ function startGame(){
   alienSpawnRate = initAlienSpawnRate
 
   // Check if this is the first game, and if it isn't clear all the aliens from the board
-  if(!firstGame) Array.from($cells).forEach(cell => cell.classList.remove('alien'))
+  if(!firstGame) $cells.removeClass('alien')
   // If it is the first game, start the spawn alien function, this only runs on the first game as it is recursive
   else spawnAlien()
   firstGame = false
@@ -173,7 +195,7 @@ function spawnAlien(){
         'display': true,
         'index': alienIndex,
         'dir': 'right',
-        'shotOdds': 0.05,
+        'shotOdds': 0.1,
         'move': function(){
           const prevIndex = this.index
           let move
@@ -239,6 +261,8 @@ function drawAlien(alien, n){
 function alienShot(alien){
   const shotCheck = Math.random()
   if (shotCheck < alien.shotOdds && !$cells.eq(alien.index + 10).hasClass('alien') && alien.display){
+    pew2.currentTime = 0
+    pew2.play()
     fireShot(alien.index, width, 60, 'alienShot')
   }
 }
@@ -265,8 +289,9 @@ function updateScore(points){
   // The player score is increased and updated...
   score += points
   $score.text(score)
-  if (score%levelUp === 0 && alienSpeed > 50) {
-    alienSpeed -= 50
+  if (score%levelUp === 0 && alienSpawnRate > 100) {
+    alienSpawnRate -= 100
+    if(alienSpeed > 50) alienSpeed -= 50
     level += 1
     $gameBoardMsg.html(`<h3>Level ${level}</h3><h5>Alien speed up!</h5>`)
     setTimeout(() => {
@@ -369,6 +394,8 @@ function fireShot(shooterIndex, dir, shotSpeed, shotType = 'shot'){
 
 function explode(index){
   $cells.eq(index).addClass('explosion')
+  explosion.currentTime = 0
+  explosion.play()
   const explosionTimer = setInterval(() => {
     $cells.eq(index).attr('data-step', currentStep)
     currentStep = currentStep === 15 ? 0 : currentStep += 1
@@ -386,15 +413,30 @@ function keydownHandler(e){
   $cells.eq(shipIndex).removeClass('ship')
   switch(e.keyCode){
     // If the key is the left arrow key, the current index is decreased
-    case 37: if (shipIndex%width !== 0) shipIndex--
+    case 37: if (shipIndex%width !== 0) {
+      shipIndex--
+      $cells.addClass('left')
+    }
       break
     // If the key is the right arrow key, the current index is increased
-    case 39: if (shipIndex%width !== width-1) shipIndex++
+    case 39: if (shipIndex%width !== width-1) {
+      shipIndex++
+      $cells.addClass('right')
+    }
       break
     // If the spacebar is held down, then a shot is fired on an interval to prevent rapid presses
     case 32: if (shotDelay === false){
+      $cells.eq(shipIndex).addClass('charging')
+      laserCharge.currentTime = 0
+      laserCharge.play()
       shotDelay = setInterval(() => {
+        $cells.removeClass('charging')
+        pew1.play()
         fireShot(shipIndex, -width, 40)
+        if(!shipActive) {
+          clearInterval(shotDelay)
+          shotDelay = false
+        }
       }, 500)
     }
       break
@@ -412,8 +454,13 @@ function keydownHandler(e){
 }
 
 function keyupHandler(e){
+  if (e.keyCode === 37 || e.keyCode === 39) setTimeout(() => {
+    $cells.removeClass('left right'), 300
+  }, 200)
   // When the spacebar is let go...
   if (e.keyCode === 32){
+    laserCharge.pause()
+    $cells.removeClass('charging')
     // ...the interval is cleared...
     clearInterval(shotDelay)
     // ...and shotDelay is reassigned as false to allow another shot
@@ -441,9 +488,9 @@ function gameOver(){
   $(document).off('keyup')
   $overlayTitle.text('Game Over')
   $overlaySubtitle.text(`You scored ${score} points`)
-  lives === 0 ? $overlayMsg.text('Your defences have been utterly defeated, because you didn\'t pew hard enough') : $overlayMsg.text('The aliens slipped past your front line and managed to take out your defences from within.')
+  lives === 0 ? $overlayMsg.text('Your defences have been utterly defeated, because you didn\'t pew hard enough') : $overlayMsg.text('The aliens dodged your pews and managed to take out your defences from behind the front line')
   $startBtn.off().text('Play again')
-  if (score > Math.min(...scores.map(score => score.score)) || scores.length < 10) {
+  if (scores.length < 10 && score !== 0 || score > Math.min(...scores.map(score => score.score))) {
     setHighScore()
   } else startEvents()
   $overlay.show()
@@ -454,15 +501,13 @@ function setHighScore(){
   $overlayMsg.text('That\'s a high score!')
   $startBtn.hide()
   $highScrForm.show()
-  $highScrForm.on('submit', (e) => {
-    formHandler(e)
-  })
 }
 
 function formHandler(e){
   e.preventDefault()
-  if($highScrInput.val() !== ''){
+  if($highScrInput.val() !== '' && $highScrInput.val().indexOf(' ') === -1){
     $highScrInput.css('border', 'none')
+    $highScrInput.attr('placeholder', 'Please enter your name.')
     const newHighScr = {'name': $highScrInput.val(), 'score': score}
     scores.push(newHighScr)
     scores.sort((a, b) => b.score - a.score)
@@ -470,11 +515,25 @@ function formHandler(e){
     localStorage.setItem('High Scores', JSON.stringify(scores))
     $highScrForm.hide()
     $startBtn.off().show()
+    updateHighScores()
+    $scoreBoard.show()
+    $overlayMsg.text('Click Play again or press Enter to start over')
     setTimeout(startEvents, 100)
   } else {
-    $highScrInput.attr('placeholder', 'Blank high score names aren\'t allowed!')
+    $highScrInput.val('')
+    $highScrInput.attr('placeholder', 'That name isn\'t allowed!')
       .css('border', 'solid 5px #f00')
   }
+}
+
+function updateHighScores(){
+  $highScores.empty()
+  if (scores.length !== 0) {
+    scores.forEach(score => {
+      const $highScore = $(`<tr><td>${score.name}</td><td>${score.score}</td></tr>`)
+      $highScore.appendTo($highScores)
+    })
+  } else $scoreBoard.hide()
 }
 
 // CHEAT CODES *****************************************************************
