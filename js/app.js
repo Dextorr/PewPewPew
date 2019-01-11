@@ -548,7 +548,7 @@ function codeCheck(e){
   codeCheckArr.splice(-konamiCode.length - 1, codeCheckArr.length - konamiCode.length)
   // if the code is entered in correct sequence, the player gets 5 extra lives
   if (codeCheckArr.join('') === konamiCode.join('')){
-    lives += 5
+    lives + 5 > 13 ? lives = 13 : lives += 5
     updateLives()
   }
 }

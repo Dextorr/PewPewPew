@@ -23,17 +23,31 @@ body {
 }
 
 header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  align-items: center;
   color: #fff;
-  height: 10vh;
+  height: 100px;
+  padding-top: 20px;
 
   h1 {
     width: 100%;
     text-align: center;
-    margin: 5px auto 0;
+    margin: 0;
+  }
+
+  .container {
+    width: 60vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: auto;
+  }
+
+  .score {
+    width: 150px;
+  }
+
+  .lives {
+    height: 50px;
+    max-width: 650px;
   }
 
   .life {
@@ -61,6 +75,14 @@ header {
   text-align: center;
   color: #fff;
 
+  h1, h2, h3 {
+    margin: 1% auto;
+  }
+
+  h1 {
+    font-size: 3em;
+  }
+
   form {
     width: 90%;
   }
@@ -69,7 +91,7 @@ header {
     text-align: center;
     width: 15%;
     padding: 2%;
-    margin: 5% auto;
+    margin: 2% auto;
     border-radius: 15px;
     font-size: 1.2em;
     display: block;
