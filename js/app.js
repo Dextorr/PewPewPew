@@ -271,7 +271,7 @@ function alienShot(alien){
 function alienMove(){
   let moveTimer
   // The aliens only move while the player ship is active
-  if(shipActive ){
+  if(shipActive){
     const liveAliens = aliens.filter(alien => alien.display)
     liveAliens.forEach(alien => {
       alienShot(alien)
