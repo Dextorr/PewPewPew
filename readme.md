@@ -114,8 +114,59 @@ This timing issue caused many problems such as aliens not being removed from the
 
 One of my original plans for the game was to have the game's events sync up to a musical track, my earlier tests involved a 'master' interval called the 'metronome' which governed the timings of the game's other functions, though I abandoned that idea to focus on other aspects of the game. Quite late into development I realised that this 'metronome' function would have perfectly solved the timing issues had I continued down that path even sans musical theme. Unfortunately it was far too late when I'd noticed this for me to be able to refactor all of the function intervals and have a reasonable amount of time left to complete the game's other features.  
 In the end I managed to figure out a reasonable workaround where I consolidated a couple of the intervals I reasonably could and had each alien also checking its previous position for an explosion and removing itself from the game if there was an explosion present in its previous position immediately after it had moved on to the next.
+
+If I could start over I would have been more careful to organise the order of each event in the game so that all of the functions would run correctly every time, without having to do multiple checks for conditions that should only really need to be checked once.
 ### Wins
+Through testing my code I came across many functions that I was able to use as actual features in the final game, such as the pause feature and the resizable grids mentioned above. I was very happy to discover that I could use the same function that I'd been using for the player's shots to allow the aliens to fire back, simply by having the alien ships occasionally running the shot function with different arguments that move the shot down the screen instead of the default upward direction of the player shot.  
+
+A feature that I was very proud of was the animated explosion sprites that displayed when the alien or player ships were hit by a shot. I managed to achieve this by setting the background of the cell where the explosion happens as the explosion sprite-sheet.
+
+![Explosion Sprite Sheet](https://user-images.githubusercontent.com/44480965/52906563-64197400-3246-11e9-8474-c1668593fc8a.png)
+
+```
+// EXPLOSION SCSS **************************************************************
+.explosion {
+  background-image: url(../assets/images/explosion.png);
+  background-repeat: no-repeat;
+  background-size: 370%;
+
+  &[data-step="0"] {
+    background-position-x: 0;
+    background-position-y: 0;
+  }
+
+  &[data-step="1"] {
+    background-position-x: calc(100%/3);
+    background-position-y: 0;
+  }
+
+  &[data-step="2"] {
+    background-position-x: calc(200%/3);
+    background-position-y: 0;
+  }
+  // ...and so on, up to data-step 15
+```
+```
+function explode(index){
+  $cells.eq(index).addClass('explosion')
+  explosion.currentTime = 0
+  explosion.play()
+  const explosionTimer = setInterval(() => {
+    $cells.eq(index).attr('data-step', currentStep)
+    currentStep = currentStep === 15 ? 0 : currentStep += 1
+    if(currentStep === 0) {
+      $cells.eq(index).removeClass('explosion')
+      clearInterval(explosionTimer)
+    }
+  }, 30)
+}
+```
+
+The background is scaled to show only one image on the sheet at a time. The `explode` function runs when a shot collides with a ship, applying the class of `explosion` to the cell on the grid where the collision occurred. Every 30 milliseconds a data-step attribute is applied to the explosion cell starting at a value of 0 and continuing to 15, therefore displaying each explosion image as per the SCSS rules. Once each image has been displayed, the `explosion` class is removed from the cell and the interval is cleared, removing the background from the cell.
+
 
 ## Future Features
+It would be nice if I could get the game to play on mobile devices. For this to work I'd have to apply the ship movement to touchscreen swipes and have the ship fire on touchscreen taps, or maybe just have the player ship fire continuously. Alternatively, I could provide buttons on the game screen, replacing the functionality of the key event listeners with click event listeners instead.
+
 [pewpewpew]: https://dextorr.github.io/project-01/
 [spaceInvaders]: https://en.wikipedia.org/wiki/Space_Invaders
