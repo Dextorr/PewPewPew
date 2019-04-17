@@ -1,7 +1,7 @@
 # GA WDI-38 Project 01
 
 #### Timeframe
-10 days
+8 days
 
 ## Technologies used
 * JavaScript (ES6) | jQuery

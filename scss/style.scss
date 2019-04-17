@@ -147,6 +147,10 @@ header {
   border-radius: 10px;
   border: 5px solid rgba(255, 255, 255, 0.5);
 
+  .cell {
+    border: 1px solid #fff;
+  }
+
   .ship,
   .alien {
     background-position: center;
