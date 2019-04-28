@@ -168,5 +168,5 @@ The background is scaled to show only one image on the sheet at a time. The `exp
 ## Future Features
 It would be nice if I could get the game to play on mobile devices. For this to work I'd have to apply the ship movement to touchscreen swipes and have the ship fire on touchscreen taps, or maybe just have the player ship fire continuously. Alternatively, I could provide buttons on the game screen, replacing the functionality of the key event listeners with click event listeners instead.
 
-[pewpewpew]: https://dextorr.github.io/project-01/
+[pewpewpew]: http://dexdeleon.com/PewPewPew/
 [spaceInvaders]: https://en.wikipedia.org/wiki/Space_Invaders
