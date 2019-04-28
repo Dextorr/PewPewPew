@@ -15,7 +15,7 @@
 
 The game can be found on this [GitHub repo](https://github.com/Dextorr/project-01) and can be played locally by cloning/downloading the repo and opening its `index.html` file in your browser.
 
-_Alternatively_, you can play the hosted version [**here.**](pewpewpew)
+_Alternatively_, you can play the hosted version [**here.**][pewpewpew]
 
 ### Game overview
 This is a 2D, single-player game inspired by the classic [Space Invaders][spaceInvaders]. The objective of **PewPewPew** is to pilot your spaceship and prevent the invading armada of aliens from reaching you by shooting them down as they approach. They occasionally return fire, so you'll need to avoid getting hit too. As you progress, more alien reinforcements will arrive and they will begin to advance more quickly.
